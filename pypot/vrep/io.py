@@ -3,6 +3,7 @@ import time
 import ctypes
 
 from threading import Lock
+from contextlib import contextmanager
 
 from .remoteApiBindings import vrep as remote_api
 from ..robot.io import AbstractIO
@@ -23,6 +24,7 @@ vrep_mode = {
     'normal': remote_api.simx_opmode_oneshot_wait,
     'streaming': remote_api.simx_opmode_streaming,
     'sending': remote_api.simx_opmode_oneshot,
+    'buffer': remote_api.simx_opmode_buffer
 }
 
 
@@ -33,8 +35,8 @@ class VrepIO(AbstractIO):
         It is based on V-REP remote API (http://www.coppeliarobotics.com/helpFiles/en/remoteApiOverview.htm).
 
     """
-    MAX_ITER = 5
-    TIMEOUT = 0.4
+    MAX_ITER = 100
+    TIMEOUT = 0.01
 
     def __init__(self, vrep_host='127.0.0.1', vrep_port=19997, scene=None, start=False):
         """ Starts the connection with the V-REP remote API server.
@@ -106,6 +108,12 @@ class VrepIO(AbstractIO):
 
         if start:
             self.start_simulation()
+
+    @contextmanager
+    def pause_communication(self):
+        self.call_remote_api("simxPauseCommunication", True, no_opmode=True)
+        yield
+        self.call_remote_api("simxPauseCommunication", False, no_opmode=True)
 
     def start_simulation(self):
         """ Starts the simulation.
@@ -293,7 +301,8 @@ class VrepIO(AbstractIO):
         f = getattr(remote_api, func_name)
 
         mode = self._extract_mode(kwargs)
-        kwargs['operationMode'] = vrep_mode[mode]
+        if not mode == 'no_opmode':
+            kwargs['operationMode'] = vrep_mode[mode]
         # hard_retry = True
 
         if '_force' in kwargs:
@@ -321,6 +330,7 @@ class VrepIO(AbstractIO):
                 break
 
             time.sleep(VrepIO.TIMEOUT)
+            # print(VrepIO.TIMEOUT)
 
         # if any(err) and hard_retry:
         #     print "HARD RETRY"
@@ -361,7 +371,7 @@ class VrepIO(AbstractIO):
         return res
 
     def _extract_mode(self, kwargs):
-        for mode in ('streaming', 'sending'):
+        for mode in ('streaming', 'sending', 'buffer', 'no_opmode'):
             if mode in kwargs:
                 kwargs.pop(mode)
                 return mode
