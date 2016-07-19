@@ -78,7 +78,7 @@ class VrepIO(AbstractIO):
             msg = ('Could not connect to V-REP server on {}:{}. '
                    'This could also means that you still have '
                    'a previously opened connection running! '
-                   '(try pypot.vrep.close_all_connections())')
+                   '(try pypot.vrep.close_all_connections()). Or that you are trying to open more connection than specified in remoteApiConnections.txt.')
             raise VrepConnectionError(
                 msg.format(self.vrep_host, self.vrep_port))
 
