@@ -16,11 +16,11 @@ import json
 from collections import OrderedDict
 
 import pypot.sensor
-import pypot.dynamixel
-import pypot.dynamixel.io
-import pypot.dynamixel.error
-import pypot.dynamixel.motor
-import pypot.dynamixel.syncloop
+# import pypot.dynamixel
+# import pypot.dynamixel.io
+# import pypot.dynamixel.error
+# import pypot.dynamixel.motor
+# import pypot.dynamixel.syncloop
 
 from .robot import Robot
 from .controller import DummyController

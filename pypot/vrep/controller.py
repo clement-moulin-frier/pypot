@@ -2,7 +2,7 @@ from numpy import rad2deg, deg2rad
 from collections import deque
 
 from ..robot.controller import MotorsController, SensorsController
-from ..dynamixel.conversion import torque_max
+# from ..dynamixel.conversion import torque_max
 from ..robot.sensor import Sensor
 from .io import remote_api
 
